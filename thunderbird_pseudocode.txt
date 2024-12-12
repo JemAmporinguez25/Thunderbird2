@@ -1,0 +1,77 @@
+MODULE Thunderbird
+    INPUTS:
+        clk          // Clock signal
+        rst          // Reset signal
+        enable       // Enable signal to control state transitions
+        isleft       // Direction flag (left or right)
+    
+    OUTPUTS:
+        output_state // Current state of the FSM (3 bits)
+
+    STATE ENCODING:
+        OFF     = 000
+        LEFT1   = 001
+        LEFT2   = 011
+        LEFT3   = 111
+        RIGHT1  = 100
+        RIGHT2  = 110
+
+    VARIABLES:
+        state      // Current state (3 bits)
+        next_state // Next state (3 bits)
+
+    SEQUENTIAL LOGIC:
+        ON rising edge of clk OR rising edge of rst:
+            IF rst THEN
+                state = OFF
+            ELSE
+                state = next_state
+
+    COMBINATIONAL LOGIC FOR NEXT STATE:
+        CASE state OF
+            OFF:
+                IF enable THEN
+                    IF isleft THEN
+                        next_state = LEFT1
+                    ELSE
+                        next_state = RIGHT1
+                ELSE
+                    next_state = OFF
+            
+            LEFT1:
+                IF enable THEN
+                    next_state = LEFT2
+                ELSE
+                    next_state = OFF
+            
+            LEFT2:
+                IF enable THEN
+                    next_state = LEFT3
+                ELSE
+                    next_state = OFF
+            
+            LEFT3:
+                IF enable THEN
+                    next_state = OFF
+                ELSE
+                    next_state = OFF
+            
+            RIGHT1:
+                IF enable THEN
+                    next_state = RIGHT2
+                ELSE
+                    next_state = OFF
+            
+            RIGHT2:
+                IF enable THEN
+                    next_state = LEFT3 // Loop back to LEFT3
+                ELSE
+                    next_state = OFF
+            
+            DEFAULT:
+                next_state = OFF
+
+    OUTPUT LOGIC:
+        output_state = state
+
+END MODULE

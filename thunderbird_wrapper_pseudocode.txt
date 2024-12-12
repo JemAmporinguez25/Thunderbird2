@@ -1,0 +1,36 @@
+MODULE thunderbird_wrapper
+    INPUTS:
+        CLK      // Main clock input
+        SW[2:0]  // Packed array for switches
+    
+    OUTPUTS:
+        LEDR[5:0] // Packed array for LEDs
+
+    VARIABLES:
+        clk      // Connects to CLK input 
+        rst      // Reset signal from SW[0]
+        enable_left, enable_right // Enable signals for left and right modules 
+        is_left, is_right           // Direction flags for left and right modules 
+        clk_en                       // Output from clk_div, toggles every second 
+        output_left, output_right    // Outputs from left and right thunderbird modules 
+
+    INSTANTIATE CLOCK DIVIDER MODULE:
+        CALL clk_div with inputs (clk, rst) and output (clk_en)
+
+    ENABLE CONDITIONS FOR MODULES:
+        enable_left = SW[2]          // Enable left when SW[2] is on 
+        enable_right = SW[1]         // Enable right when SW[1] is on 
+        is_left = TRUE                // Set direction to left 
+        is_right = FALSE              // Set direction to right 
+
+    INSTANTIATE THUNDERBIRD MODULES:
+        CALL thunderbird left_module with inputs (clk_en, rst, is_left, enable_left) and output (output_left)
+        
+        CALL thunderbird right_module with inputs (clk_en, rst, is_right, enable_right) and output (output_right)
+
+    MAP FSM OUTPUTS TO LEDs:
+        LEDR[5:3] = output_left       // Map left states to LEDR[5:3]
+        LEDR[2:0] = output_right      // Map right states to LEDR[2:0]
+
+END MODULE
+

@@ -1,0 +1,23 @@
+MODULE clk_div
+    INPUTS:
+        clk      // Input clock signal from FPGA
+        rst      // Reset signal to initialize the divider
+    
+    OUTPUTS:
+        clk_en   // Output enable signal generated at a slower rate
+
+    VARIABLES:
+        clk_count // 25-bit counter to divide the clock frequency
+
+    CLOCK COUNTING LOGIC:
+        ON rising edge of clk OR rising edge of rst:
+            IF rst THEN
+                clk_count = 0 // Reset counter to zero
+            ELSE 
+                clk_count = clk_count + 1 // Increment counter
+
+    ENABLE SIGNAL GENERATION:
+        clk_en = AND of all bits in clk_count // Generate enable signal when all bits are '1'
+
+END MODULE
+
